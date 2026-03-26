@@ -1,0 +1,50 @@
+{
+  // CRUCIBLE Zenoh ROS2 DDS Bridge Configuration
+  //
+  // This bridge runs alongside the sim engine and routes simulated
+  // sensor topics to agent stacks via Zenoh. Agent stacks peer with
+  // this bridge the same way they peer with each other in reality.
+
+  mode: "router",
+
+  listen: {
+    endpoints: [
+      "tcp/0.0.0.0:7447"
+    ]
+  },
+
+  // Scouting for peer discovery on the Docker network
+  scouting: {
+    multicast: {
+      enabled: true
+    }
+  },
+
+  // ROS2 DDS plugin configuration
+  plugins: {
+    ros2dds: {
+      // Bridge the sim engine's DDS domain
+      domain: 0,
+
+      // Allow all agent-namespaced topics through
+      // Each agent's topics follow the pattern: /<agent_id>/<sensor_suffix>
+      allow: {
+        publishers: [
+          "*/gps/fix",
+          "*/imu/data",
+          "*/altimeter/data",
+          "*/twr/ranges",
+          "*/sim/ground_truth",
+          "/clock"
+        ],
+        subscribers: [
+          "*/cmd_vel",
+          "*/pose/estimate"
+        ],
+        services: [
+          "/sim/**"
+        ]
+      }
+    }
+  }
+}

@@ -1,0 +1,66 @@
+version: "3.8"
+
+networks:
+  swarm_net:
+    external: true
+
+services:
+  sim_engine:
+    build:
+      context: .
+      dockerfile: src/crucible_engine/Dockerfile.sim_engine
+    networks:
+      swarm_net:
+        ipv4_address: ${SIM_ENGINE_IP:-172.20.0.100}
+    environment:
+      - ROS_AUTOMATIC_DISCOVERY_RANGE=LOCALHOST
+      - ROS_DOMAIN_ID=0
+      - RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
+    volumes:
+      - ./config:/opt/config:ro
+      - ./data/terrain:/opt/terrain:ro
+    command: >
+      ros2 run sim_engine sim_engine
+        --ros-args -p config_file:=/opt/config/scenario.yaml
+
+  zenoh_bridge:
+    image: eclipse/zenoh-bridge-ros2dds:latest
+    network_mode: "service:sim_engine"
+    volumes:
+      - ./config/zenoh_bridge.json5:/etc/zenoh/config.json5:ro
+    depends_on:
+      - sim_engine
+
+  ws_bridge:
+    build:
+      context: .
+      dockerfile: src/crucible_engine/Dockerfile.ws_bridge
+    network_mode: "service:sim_engine"
+    environment:
+      - ROS_AUTOMATIC_DISCOVERY_RANGE=LOCALHOST
+      - ROS_DOMAIN_ID=0
+      - RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
+    depends_on:
+      - sim_engine
+    command: ros2 run ws_bridge ws_bridge
+
+  stack_orchestrator:
+    build:
+      context: ./src/crucible_orch
+      dockerfile: Dockerfile
+    networks:
+      swarm_net:
+        ipv4_address: ${ORCHESTRATOR_IP:-172.20.0.101}
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./stacks:/opt/stacks:ro
+
+  frontend:
+    build:
+      context: .
+      dockerfile: src/crucible_engine/Dockerfile.frontend
+    ports:
+      - "${FRONTEND_PORT:-8080}:80"
+    depends_on:
+      - ws_bridge
+      - stack_orchestrator

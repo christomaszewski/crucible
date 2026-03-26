@@ -1,0 +1,170 @@
+# CRUCIBLE — Example Scenario Configuration
+# Collaborative Robotics Unified Configuration, Instrumentation,
+# Benchmarking, and Lifecycle Environment
+
+sim:
+  tick_rate_hz: 100
+  speed_multiplier: 1.0
+  seed: 42
+  # terrain:
+  #   dem_path: "/opt/terrain/N38W078.hgt"
+
+agents:
+  uav_01:
+    domain_id: 1
+    initial_pose:
+      lat: 38.90720
+      lon: -77.03690
+      alt: 100.0
+      heading: 0.0
+    motion:
+      type: static
+    sensors:
+      navsatfix:
+        type: navsatfix
+        topic_suffix: "gps/fix"
+        rate_hz: 5
+        seed: 101
+        noise:
+          horizontal_std_m: 1.5
+          vertical_std_m: 3.0
+      imu:
+        type: imu
+        topic_suffix: "imu/data"
+        rate_hz: 50
+        seed: 102
+        noise:
+          accel_std: 0.01
+          gyro_std: 0.001
+          orientation_std: 0.005
+      altimeter:
+        type: altimeter
+        topic_suffix: "altimeter/data"
+        rate_hz: 10
+        seed: 103
+        noise:
+          std_m: 0.5
+      twr_radio:
+        type: twr_radio
+        topic_suffix: "twr/ranges"
+        rate_hz: 1
+        seed: 104
+        max_range_m: 500.0
+        noise:
+          std_m: 0.1
+    ground_truth:
+      topic_suffix: "sim/ground_truth"
+      rate_hz: 50
+    pose_estimate_topic: "/uav_01/pose/estimate"
+    stack:
+      compose_file: "./stacks/agent_stack.yml"
+      auto_launch: false
+      env:
+        AGENT_ID: uav_01
+        ROS_DOMAIN_ID: "1"
+        AGENT_NAMESPACE: uav_01
+
+  uav_02:
+    domain_id: 2
+    initial_pose:
+      lat: 38.90750
+      lon: -77.03650
+      alt: 100.0
+      heading: 0.0
+    motion:
+      type: static
+    sensors:
+      navsatfix:
+        type: navsatfix
+        topic_suffix: "gps/fix"
+        rate_hz: 5
+        seed: 201
+        noise:
+          horizontal_std_m: 1.5
+          vertical_std_m: 3.0
+      imu:
+        type: imu
+        topic_suffix: "imu/data"
+        rate_hz: 50
+        seed: 202
+        noise:
+          accel_std: 0.01
+          gyro_std: 0.001
+      altimeter:
+        type: altimeter
+        topic_suffix: "altimeter/data"
+        rate_hz: 10
+        seed: 203
+        noise:
+          std_m: 0.5
+      twr_radio:
+        type: twr_radio
+        topic_suffix: "twr/ranges"
+        rate_hz: 1
+        seed: 204
+        max_range_m: 500.0
+        noise:
+          std_m: 0.1
+    pose_estimate_topic: "/uav_02/pose/estimate"
+    stack:
+      compose_file: "./stacks/agent_stack.yml"
+      auto_launch: false
+      env:
+        AGENT_ID: uav_02
+        ROS_DOMAIN_ID: "2"
+        AGENT_NAMESPACE: uav_02
+
+  uav_03:
+    domain_id: 3
+    initial_pose:
+      lat: 38.90690
+      lon: -77.03720
+      alt: 100.0
+      heading: 0.0
+    motion:
+      type: static
+    sensors:
+      navsatfix:
+        type: navsatfix
+        topic_suffix: "gps/fix"
+        rate_hz: 5
+        seed: 301
+        noise:
+          horizontal_std_m: 1.5
+          vertical_std_m: 3.0
+      twr_radio:
+        type: twr_radio
+        topic_suffix: "twr/ranges"
+        rate_hz: 1
+        seed: 304
+        max_range_m: 500.0
+        noise:
+          std_m: 0.1
+    pose_estimate_topic: "/uav_03/pose/estimate"
+    stack:
+      compose_file: "./stacks/agent_stack.yml"
+      auto_launch: false
+      env:
+        AGENT_ID: uav_03
+        ROS_DOMAIN_ID: "3"
+        AGENT_NAMESPACE: uav_03
+
+# Scenario events — timed actions during simulation
+scenario:
+  duration_s: 300
+  events:
+    - time_s: 60
+      action: disable_sensor
+      agent: uav_03
+      sensor: navsatfix
+    - time_s: 120
+      action: update_param
+      agent: uav_01
+      sensor: twr_radio
+      param: max_range_m
+      value: 100.0
+    - time_s: 180
+      action: set_pose
+      agent: uav_02
+      lat: 38.90800
+      lon: -77.03600

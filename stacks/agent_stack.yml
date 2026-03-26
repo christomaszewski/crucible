@@ -1,0 +1,75 @@
+# CRUCIBLE — Agent Stack Template
+#
+# This is a template docker-compose file for an agent's software stack.
+# CRUCIBLE's stack orchestrator launches this with environment variables
+# set per agent:
+#   AGENT_ID        — unique agent identifier (e.g., uav_01)
+#   ROS_DOMAIN_ID   — DDS domain for this agent
+#   AGENT_NAMESPACE — ROS2 namespace for this agent's nodes
+#
+# Customize this file for your specific autonomy stack.
+
+version: "3.8"
+
+networks:
+  swarm_net:
+    external: true
+
+services:
+  # Gateway container — the only container on the swarm network.
+  # All other containers share this network namespace.
+  comms_gateway:
+    image: ros:jazzy
+    networks:
+      swarm_net: {}
+    environment:
+      - ROS_AUTOMATIC_DISCOVERY_RANGE=LOCALHOST
+      - ROS_DOMAIN_ID=${ROS_DOMAIN_ID}
+      - RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
+    command: ["sleep", "infinity"]  # Replace with your gateway node
+
+  # Zenoh bridge — routes inter-agent traffic
+  zenoh_bridge:
+    image: eclipse/zenoh-bridge-ros2dds:latest
+    network_mode: "service:comms_gateway"
+    # volumes:
+    #   - ./zenoh_agent.json5:/etc/zenoh/config.json5:ro
+    depends_on:
+      - comms_gateway
+
+  # Example: Your pose estimator (KRAKEN, etc.)
+  # estimator:
+  #   build: ./your_estimator
+  #   network_mode: "service:comms_gateway"
+  #   environment:
+  #     - ROS_AUTOMATIC_DISCOVERY_RANGE=LOCALHOST
+  #     - ROS_DOMAIN_ID=${ROS_DOMAIN_ID}
+  #     - RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
+  #     - AGENT_ID=${AGENT_ID}
+  #   depends_on:
+  #     - comms_gateway
+
+  # Example: Your autopilot / guidance node
+  # autopilot:
+  #   build: ./your_autopilot
+  #   network_mode: "service:comms_gateway"
+  #   environment:
+  #     - ROS_AUTOMATIC_DISCOVERY_RANGE=LOCALHOST
+  #     - ROS_DOMAIN_ID=${ROS_DOMAIN_ID}
+  #     - AGENT_ID=${AGENT_ID}
+  #   depends_on:
+  #     - comms_gateway
+
+  # Example: Bag recorder
+  # recorder:
+  #   image: ros:jazzy
+  #   network_mode: "service:comms_gateway"
+  #   environment:
+  #     - ROS_AUTOMATIC_DISCOVERY_RANGE=LOCALHOST
+  #     - ROS_DOMAIN_ID=${ROS_DOMAIN_ID}
+  #   volumes:
+  #     - ./bags/${AGENT_ID}:/bags
+  #   command: >
+  #     ros2 bag record -a -o /bags/${AGENT_ID}_session
+  #   depends_on:
+  #     - comms_gateway
