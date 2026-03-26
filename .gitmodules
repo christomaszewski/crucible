@@ -1,0 +1,9 @@
+[submodule "src/crucible_msgs"]
+	path = src/crucible_msgs
+	url = git@github.com:christomaszewski/crucible_msgs.git
+[submodule "src/crucible_engine"]
+	path = src/crucible_engine
+	url = git@github.com:christomaszewski/crucible_engine.git
+[submodule "src/crucible_orch"]
+	path = src/crucible_orch
+	url = git@github.com:christomaszewski/crucible_orch.git
