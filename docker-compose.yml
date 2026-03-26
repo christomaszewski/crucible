@@ -8,7 +8,7 @@ services:
   sim_engine:
     build:
       context: .
-      dockerfile: src/crucible_engine/Dockerfile.sim_engine
+      dockerfile: src/crucible_engine/docker/Dockerfile.sim_engine
     networks:
       swarm_net:
         ipv4_address: ${SIM_ENGINE_IP:-172.20.0.100}
@@ -34,7 +34,7 @@ services:
   ws_bridge:
     build:
       context: .
-      dockerfile: src/crucible_engine/Dockerfile.ws_bridge
+      dockerfile: src/crucible_engine/docker/Dockerfile.ws_bridge
     network_mode: "service:sim_engine"
     environment:
       - ROS_AUTOMATIC_DISCOVERY_RANGE=LOCALHOST
@@ -47,7 +47,7 @@ services:
   stack_orchestrator:
     build:
       context: ./src/crucible_orch
-      dockerfile: Dockerfile
+      dockerfile: docker/Dockerfile
     networks:
       swarm_net:
         ipv4_address: ${ORCHESTRATOR_IP:-172.20.0.101}
@@ -58,7 +58,9 @@ services:
   frontend:
     build:
       context: .
-      dockerfile: src/crucible_engine/Dockerfile.frontend
+      dockerfile: src/crucible_engine/docker/Dockerfile.frontend
+    networks:
+      - swarm_net
     ports:
       - "${FRONTEND_PORT:-8080}:80"
     depends_on:

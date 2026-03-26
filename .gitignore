@@ -1,0 +1,31 @@
+# ROS2 build artifacts
+build/
+install/
+log/
+.colcon/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+dist/
+.eggs/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Terrain data (large files, download separately)
+data/terrain/*.hgt
+data/terrain/*.tif
+
+# Bag recordings
+bags/
