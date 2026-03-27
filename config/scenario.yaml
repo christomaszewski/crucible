@@ -1,17 +1,17 @@
-# CRUCIBLE — Example Scenario Configuration
-# Collaborative Robotics Unified Configuration, Instrumentation,
-# Benchmarking, and Lifecycle Environment
+# CRUCIBLE — Comprehensive Test Scenario
+# Exercises all vehicle types, sensor types, motion models, and scenario events.
 
 sim:
-  sim_dt: 0.01
+  sim_dt: 0.01            # 10ms fixed timestep
   speed_multiplier: 1.0
   seed: 42
-  # terrain:
-  #   dem_path: "/opt/terrain/N38W078.hgt"
 
 agents:
+  # --- UAV: static hover with full sensor suite ---
   uav_01:
     domain_id: 1
+    vehicle_type: uav
+    vehicle_class: quadrotor
     initial_pose:
       lat: 38.90720
       lon: -77.03690
@@ -52,9 +52,6 @@ agents:
         max_range_m: 500.0
         noise:
           std_m: 0.1
-    ground_truth:
-      topic_suffix: "sim/ground_truth"
-      rate_hz: 50
     pose_estimate_topic: "/uav_01/pose/estimate"
     stack:
       compose_file: "./stacks/agent_stack.yml"
@@ -64,47 +61,51 @@ agents:
         ROS_DOMAIN_ID: "1"
         AGENT_NAMESPACE: uav_01
 
+  # --- UAV: waypoint flight with GPS + ranging ---
   uav_02:
     domain_id: 2
+    vehicle_type: uav
+    vehicle_class: fixed_wing
     initial_pose:
       lat: 38.90750
       lon: -77.03650
-      alt: 100.0
-      heading: 0.0
+      alt: 120.0
+      heading: 1.5708  # east
     motion:
-      type: static
+      type: waypoint
+      speed_mps: 15.0
+      arrival_threshold_m: 5.0
+      loop: true
+      waypoints:
+        - lat: 38.90750
+          lon: -77.03650
+          alt: 120.0
+        - lat: 38.90800
+          lon: -77.03550
+          alt: 130.0
+        - lat: 38.90850
+          lon: -77.03650
+          alt: 120.0
+        - lat: 38.90800
+          lon: -77.03750
+          alt: 110.0
     sensors:
       navsatfix:
         type: navsatfix
         topic_suffix: "gps/fix"
-        rate_hz: 5
+        rate_hz: 10
         seed: 201
         noise:
-          horizontal_std_m: 1.5
-          vertical_std_m: 3.0
-      imu:
-        type: imu
-        topic_suffix: "imu/data"
-        rate_hz: 50
-        seed: 202
-        noise:
-          accel_std: 0.01
-          gyro_std: 0.001
-      altimeter:
-        type: altimeter
-        topic_suffix: "altimeter/data"
-        rate_hz: 10
-        seed: 203
-        noise:
-          std_m: 0.5
+          horizontal_std_m: 2.0
+          vertical_std_m: 4.0
       twr_radio:
         type: twr_radio
         topic_suffix: "twr/ranges"
-        rate_hz: 1
+        rate_hz: 2
         seed: 204
-        max_range_m: 500.0
+        max_range_m: 800.0
         noise:
-          std_m: 0.1
+          std_m: 0.15
     pose_estimate_topic: "/uav_02/pose/estimate"
     stack:
       compose_file: "./stacks/agent_stack.yml"
@@ -114,15 +115,31 @@ agents:
         ROS_DOMAIN_ID: "2"
         AGENT_NAMESPACE: uav_02
 
-  uav_03:
+  # --- UGV: waypoint patrol with GPS + IMU ---
+  ugv_01:
     domain_id: 3
+    vehicle_type: ugv
+    vehicle_class: tracked
     initial_pose:
-      lat: 38.90690
+      lat: 38.90680
       lon: -77.03720
-      alt: 100.0
+      alt: 0.0
       heading: 0.0
     motion:
-      type: static
+      type: waypoint
+      speed_mps: 3.0
+      arrival_threshold_m: 2.0
+      loop: true
+      waypoints:
+        - lat: 38.90680
+          lon: -77.03720
+          alt: 0.0
+        - lat: 38.90700
+          lon: -77.03680
+          alt: 0.0
+        - lat: 38.90720
+          lon: -77.03720
+          alt: 0.0
     sensors:
       navsatfix:
         type: navsatfix
@@ -130,41 +147,173 @@ agents:
         rate_hz: 5
         seed: 301
         noise:
-          horizontal_std_m: 1.5
-          vertical_std_m: 3.0
+          horizontal_std_m: 1.0
+          vertical_std_m: 2.0
+      imu:
+        type: imu
+        topic_suffix: "imu/data"
+        rate_hz: 100
+        seed: 302
+        noise:
+          accel_std: 0.02
+          gyro_std: 0.002
+          orientation_std: 0.01
       twr_radio:
         type: twr_radio
         topic_suffix: "twr/ranges"
         rate_hz: 1
         seed: 304
-        max_range_m: 500.0
+        max_range_m: 300.0
         noise:
-          std_m: 0.1
-    pose_estimate_topic: "/uav_03/pose/estimate"
+          std_m: 0.08
     stack:
       compose_file: "./stacks/agent_stack.yml"
       auto_launch: false
       env:
-        AGENT_ID: uav_03
+        AGENT_ID: ugv_01
         ROS_DOMAIN_ID: "3"
-        AGENT_NAMESPACE: uav_03
+        AGENT_NAMESPACE: ugv_01
+
+  # --- USV: static with commanded_velocity motion (ready for external control) ---
+  usv_01:
+    domain_id: 4
+    vehicle_type: usv
+    vehicle_class: catamaran
+    initial_pose:
+      lat: 38.90650
+      lon: -77.03750
+      alt: 0.0
+      heading: 3.1416  # south
+    motion:
+      type: commanded_velocity
+      max_speed_mps: 8.0
+      topic_suffix: "cmd_vel"
+    sensors:
+      navsatfix:
+        type: navsatfix
+        topic_suffix: "gps/fix"
+        rate_hz: 5
+        seed: 401
+        noise:
+          horizontal_std_m: 3.0
+          vertical_std_m: 5.0
+      imu:
+        type: imu
+        topic_suffix: "imu/data"
+        rate_hz: 50
+        seed: 402
+        noise:
+          accel_std: 0.05
+          gyro_std: 0.005
+          orientation_std: 0.02
+      twr_radio:
+        type: twr_radio
+        topic_suffix: "twr/ranges"
+        rate_hz: 1
+        seed: 404
+        max_range_m: 500.0
+        noise:
+          std_m: 0.1
+    stack:
+      compose_file: "./stacks/agent_stack.yml"
+      auto_launch: false
+      env:
+        AGENT_ID: usv_01
+        ROS_DOMAIN_ID: "4"
+        AGENT_NAMESPACE: usv_01
+
+  # --- UUV: waypoint dive with altimeter + ranging ---
+  uuv_01:
+    domain_id: 5
+    vehicle_type: uuv
+    vehicle_class: torpedo
+    initial_pose:
+      lat: 38.90660
+      lon: -77.03680
+      alt: -10.0
+      heading: 0.7854  # northeast
+    motion:
+      type: waypoint
+      speed_mps: 2.0
+      arrival_threshold_m: 3.0
+      loop: false
+      waypoints:
+        - lat: 38.90660
+          lon: -77.03680
+          alt: -10.0
+        - lat: 38.90690
+          lon: -77.03640
+          alt: -20.0
+        - lat: 38.90720
+          lon: -77.03600
+          alt: -30.0
+        - lat: 38.90750
+          lon: -77.03560
+          alt: -10.0
+    sensors:
+      altimeter:
+        type: altimeter
+        topic_suffix: "depth/data"
+        rate_hz: 10
+        use_agl: false
+        seed: 503
+        noise:
+          std_m: 0.3
+      imu:
+        type: imu
+        topic_suffix: "imu/data"
+        rate_hz: 50
+        seed: 502
+        noise:
+          accel_std: 0.01
+          gyro_std: 0.001
+          orientation_std: 0.003
+      twr_radio:
+        type: twr_radio
+        topic_suffix: "twr/ranges"
+        rate_hz: 0.5
+        seed: 504
+        max_range_m: 200.0
+        noise:
+          std_m: 0.2
 
 # Scenario events — timed actions during simulation
 scenario:
   duration_s: 300
   events:
-    - time_s: 60
+    # At 30s: disable GPS on UGV (simulates GPS-denied environment)
+    - time_s: 30
       action: disable_sensor
-      agent: uav_03
+      agent: ugv_01
       sensor: navsatfix
-    - time_s: 120
+
+    # At 60s: reduce TWR range on uav_01 (simulates degraded radio)
+    - time_s: 60
       action: update_param
       agent: uav_01
       sensor: twr_radio
       param: max_range_m
-      value: 100.0
-    - time_s: 180
-      action: set_pose
+      value: 150.0
+
+    # At 90s: increase GPS noise on uav_02 (simulates interference)
+    - time_s: 90
+      action: update_param
       agent: uav_02
-      lat: 38.90800
-      lon: -77.03600
+      sensor: navsatfix
+      param: horizontal_std_m
+      value: 10.0
+
+    # At 120s: teleport USV to new position
+    - time_s: 120
+      action: set_pose
+      agent: usv_01
+      lat: 38.90700
+      lon: -77.03700
+
+    # At 180s: increase UUV altimeter noise (simulates depth sensor degradation)
+    - time_s: 180
+      action: update_param
+      agent: uuv_01
+      sensor: altimeter
+      param: std_m
+      value: 2.0
