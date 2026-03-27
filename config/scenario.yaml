@@ -3,7 +3,7 @@
 # Benchmarking, and Lifecycle Environment
 
 sim:
-  tick_rate_hz: 100
+  sim_dt: 0.01
   speed_multiplier: 1.0
   seed: 42
   # terrain:
