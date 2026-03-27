@@ -116,7 +116,7 @@ agents:
         AGENT_NAMESPACE: uav_02
 
   # --- UGV: waypoint patrol with GPS + IMU ---
-  ugv_01:
+  ugv_03:
     domain_id: 3
     vehicle_type: ugv
     vehicle_class: tracked
@@ -170,12 +170,12 @@ agents:
       compose_file: "./stacks/agent_stack.yml"
       auto_launch: false
       env:
-        AGENT_ID: ugv_01
+        AGENT_ID: ugv_03
         ROS_DOMAIN_ID: "3"
-        AGENT_NAMESPACE: ugv_01
+        AGENT_NAMESPACE: ugv_03
 
   # --- USV: static with commanded_velocity motion (ready for external control) ---
-  usv_01:
+  usv_04:
     domain_id: 4
     vehicle_type: usv
     vehicle_class: catamaran
@@ -218,12 +218,12 @@ agents:
       compose_file: "./stacks/agent_stack.yml"
       auto_launch: false
       env:
-        AGENT_ID: usv_01
+        AGENT_ID: usv_04
         ROS_DOMAIN_ID: "4"
-        AGENT_NAMESPACE: usv_01
+        AGENT_NAMESPACE: usv_04
 
   # --- UUV: waypoint dive with altimeter + ranging ---
-  uuv_01:
+  uuv_05:
     domain_id: 5
     vehicle_type: uuv
     vehicle_class: torpedo
@@ -284,7 +284,7 @@ scenario:
     # At 30s: disable GPS on UGV (simulates GPS-denied environment)
     - time_s: 30
       action: disable_sensor
-      agent: ugv_01
+      agent: ugv_03
       sensor: navsatfix
 
     # At 60s: reduce TWR range on uav_01 (simulates degraded radio)
@@ -306,14 +306,14 @@ scenario:
     # At 120s: teleport USV to new position
     - time_s: 120
       action: set_pose
-      agent: usv_01
+      agent: usv_04
       lat: 38.90700
       lon: -77.03700
 
     # At 180s: increase UUV altimeter noise (simulates depth sensor degradation)
     - time_s: 180
       action: update_param
-      agent: uuv_01
+      agent: uuv_05
       sensor: altimeter
       param: std_m
       value: 2.0
