@@ -54,7 +54,7 @@ agents:
           std_m: 0.1
     pose_estimate_topic: "/uav_01/pose/estimate"
     stack:
-      compose_file: "./stacks/agent_stack.yml"
+      compose_file: "/opt/stacks/agent_stack.yml"
       auto_launch: false
       env:
         AGENT_ID: uav_01
@@ -108,7 +108,7 @@ agents:
           std_m: 0.15
     pose_estimate_topic: "/uav_02/pose/estimate"
     stack:
-      compose_file: "./stacks/agent_stack.yml"
+      compose_file: "/opt/stacks/agent_stack.yml"
       auto_launch: false
       env:
         AGENT_ID: uav_02
@@ -167,7 +167,7 @@ agents:
         noise:
           std_m: 0.08
     stack:
-      compose_file: "./stacks/agent_stack.yml"
+      compose_file: "/opt/stacks/agent_stack.yml"
       auto_launch: false
       env:
         AGENT_ID: ugv_03
@@ -215,7 +215,7 @@ agents:
         noise:
           std_m: 0.1
     stack:
-      compose_file: "./stacks/agent_stack.yml"
+      compose_file: "/opt/stacks/agent_stack.yml"
       auto_launch: false
       env:
         AGENT_ID: usv_04
