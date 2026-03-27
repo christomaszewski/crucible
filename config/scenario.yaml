@@ -16,7 +16,7 @@ agents:
       lat: 38.90720
       lon: -77.03690
       alt: 100.0
-      heading: 0.0
+      heading: 0.7854  # NE (45°)
     motion:
       type: static
     sensors:
@@ -124,7 +124,7 @@ agents:
       lat: 38.90680
       lon: -77.03720
       alt: 0.0
-      heading: 0.0
+      heading: 4.7124  # W (270°)
     motion:
       type: waypoint
       speed_mps: 3.0
