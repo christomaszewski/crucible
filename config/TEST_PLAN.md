@@ -115,7 +115,7 @@ all 4 sensor types, all 3 motion models, and 5 scenario events.
 | 8.3 | Click a sensor card header | Card expands showing topic path, all config params, noise params |
 | 8.4 | Click the header again | Card collapses |
 | 8.5 | Verify chevron animation | Arrow rotates 180° on expand, back on collapse |
-| 8.6 | Verify topic path | Shows `/<agent_id>/<topic_suffix>` in accent color |
+| 8.6 | Verify topic path | Shows `/<agent_name>/<topic_suffix>` in accent color |
 | 8.7 | Verify noise section | Noise params grouped under "noise" label with divider |
 
 ---
@@ -127,7 +127,7 @@ all 4 sensor types, all 3 motion models, and 5 scenario events.
 | 9.1 | Expand a navsatfix sensor card | Values like `rate_hz`, `horizontal_std_m` are highlighted on hover |
 | 9.2 | Click on the `rate_hz` value | Value turns into a text input, pre-filled with current value |
 | 9.3 | Change the value to `10`, press Enter | Input closes, value updates to `10`, toast says "Updated navsatfix config" |
-| 9.4 | Verify via `ros2 topic hz /<agent_id>/gps/fix` | Publishing rate changed to ~10 Hz |
+| 9.4 | Verify via `ros2 topic hz /<agent_name>/gps/fix` | Publishing rate changed to ~10 Hz |
 | 9.5 | Click a noise value, change it, click away (blur) | Value saved on blur |
 | 9.6 | Click a value, press Escape | Edit cancelled, original value restored |
 | 9.7 | Verify `type` field is NOT editable | No hover highlight, clicking does nothing |
@@ -189,7 +189,7 @@ all 4 sensor types, all 3 motion models, and 5 scenario events.
 | 13.4 | Change to **10x** | Fast-forward. Waypoint agents complete loops quickly |
 | 13.5 | Change to **Max** (0x) | Sim runs as fast as CPU allows |
 | 13.6 | Change back to **1x** | Normal speed resumes |
-| 13.7 | Verify via `ros2 topic hz /<agent_id>/gps/fix` | At 1x: ~5 Hz. At 2x: ~10 Hz. At 0.5x: ~2.5 Hz |
+| 13.7 | Verify via `ros2 topic hz /<agent_name>/gps/fix` | At 1x: ~5 Hz. At 2x: ~10 Hz. At 0.5x: ~2.5 Hz |
 
 ---
 
@@ -248,7 +248,7 @@ all 4 sensor types, all 3 motion models, and 5 scenario events.
 
 | # | Action | Expected Result |
 |---|--------|-----------------|
-| 18.1 | Run sim, check `ros2 topic list` | Each agent has `/<agent_id>/sim/ground_truth` topic |
+| 18.1 | Run sim, check `ros2 topic list` | Each agent has `/<agent_name>/sim/ground_truth` topic |
 | 18.2 | `ros2 topic echo /uav_02/sim/ground_truth` | Shows lat/lon/alt changing with waypoint motion |
 | 18.3 | `ros2 topic hz /uav_01/sim/ground_truth` | Should be ~50 Hz at 1x speed |
 | 18.4 | Compare ground truth vs navsatfix for same agent | Ground truth exact; navsatfix has noise |

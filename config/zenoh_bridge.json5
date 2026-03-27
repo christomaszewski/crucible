@@ -27,7 +27,7 @@
       domain: 0,
 
       // Allow all agent-namespaced topics through
-      // Each agent's topics follow the pattern: /<agent_id>/<sensor_suffix>
+      // Each agent's topics follow the pattern: /<agent_name>/<sensor_suffix>
       allow: {
         publishers: [
           "*/gps/fix",

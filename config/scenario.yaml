@@ -57,7 +57,7 @@ agents:
       compose_file: "/opt/stacks/agent_stack.yml"
       auto_launch: false
       env:
-        AGENT_ID: uav_01
+        AGENT_NAME: uav_01
         ROS_DOMAIN_ID: "1"
         AGENT_NAMESPACE: uav_01
 
@@ -111,7 +111,7 @@ agents:
       compose_file: "/opt/stacks/agent_stack.yml"
       auto_launch: false
       env:
-        AGENT_ID: uav_02
+        AGENT_NAME: uav_02
         ROS_DOMAIN_ID: "2"
         AGENT_NAMESPACE: uav_02
 
@@ -170,7 +170,7 @@ agents:
       compose_file: "/opt/stacks/agent_stack.yml"
       auto_launch: false
       env:
-        AGENT_ID: ugv_03
+        AGENT_NAME: ugv_03
         ROS_DOMAIN_ID: "3"
         AGENT_NAMESPACE: ugv_03
 
@@ -218,7 +218,7 @@ agents:
       compose_file: "/opt/stacks/agent_stack.yml"
       auto_launch: false
       env:
-        AGENT_ID: usv_04
+        AGENT_NAME: usv_04
         ROS_DOMAIN_ID: "4"
         AGENT_NAMESPACE: usv_04
 

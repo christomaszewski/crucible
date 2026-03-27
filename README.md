@@ -150,7 +150,7 @@ Define complete test scenarios in YAML:
 ### Stack Orchestration
 Launch full autonomy stacks per agent directly from the browser:
 - Click "Launch Stack" on an agent to spin up its Docker Compose stack
-- Environment variables (AGENT_ID, ROS_DOMAIN_ID) are injected automatically
+- Environment variables (AGENT_NAME, AGENT_NUM, ROS_DOMAIN_ID, etc.) are injected automatically
 - Monitor stack status in real time
 - Tear down individual stacks or all at once
 
