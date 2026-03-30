@@ -4,12 +4,13 @@
 # CRUCIBLE's stack orchestrator launches this with environment variables
 # set per agent (controllable via the System Env panel in the UI):
 #
-#   AGENT_ID        — integer agent ID (e.g., 1), usable for IP assignment
-#   AGENT_NAME      — full agent identifier (e.g., uav_01)
-#   ROS_DOMAIN_ID   — DDS domain for this agent
-#   AGENT_NAMESPACE — ROS2 namespace for this agent's nodes
-#   FLEET_SIZE      — total number of agents in the scenario
-#   FLEET_AGENTS    — comma-separated list of all agent names
+#   AGENT_ID     — integer agent ID (e.g., 1), usable for IP assignment
+#   AGENT_NAME   — full agent identifier (e.g., uav_01)
+#   AGENT_NS     — ROS2 namespace (defaults to AGENT_NAME)
+#   FLEET_NAMES  — comma-separated list of all agent names
+#   FLEET_SIZE   — total number of agents in the scenario
+#   ROS_DOMAIN_ID — DDS domain for this agent
+#   SIM_NET      — Docker network name (default: crucible_sim_net)
 #
 # Network layout:
 #   Crucible creates 'crucible_sim_net' (default 10.0.0.0/16).
@@ -21,7 +22,7 @@
 networks:
   sim_net:
     external: true
-    name: crucible_sim_net
+    name: ${SIM_NET:-crucible_sim_net}
 
 services:
   # Gateway container — anchors the agent on the sim network.
