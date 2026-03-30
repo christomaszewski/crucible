@@ -9,21 +9,28 @@
 #   ROS_DOMAIN_ID   — DDS domain for this agent
 #   AGENT_NAMESPACE — ROS2 namespace for this agent's nodes
 #   FLEET_SIZE      — total number of agents in the scenario
-#   FLEET_AGENTS    — comma-separated list of all agent IDs
+#   FLEET_AGENTS    — comma-separated list of all agent names
+#
+# Network layout:
+#   Crucible creates 'crucible_sim_net' (default 10.0.0.0/16).
+#   Each agent gets 10.0.{AGENT_ID}.X — use the last octet to
+#   differentiate services within the agent's stack.
 #
 # Customize this file for your specific autonomy stack.
 
 networks:
-  swarm_net:
+  sim_net:
     external: true
+    name: crucible_sim_net
 
 services:
-  # Gateway container — the only container on the swarm network.
+  # Gateway container — anchors the agent on the sim network.
   # All other containers share this network namespace.
   comms_gateway:
     image: ros:jazzy
     networks:
-      swarm_net: {}
+      sim_net:
+        ipv4_address: 10.0.${AGENT_ID}.10
     environment:
       - ROS_AUTOMATIC_DISCOVERY_RANGE=LOCALHOST
       - ROS_DOMAIN_ID=${ROS_DOMAIN_ID}
@@ -39,7 +46,7 @@ services:
     depends_on:
       - comms_gateway
 
-  # Example: Your pose estimator (KRAKEN, etc.)
+  # Example: Your pose estimator
   # estimator:
   #   build: ./your_estimator
   #   network_mode: "service:comms_gateway"
@@ -51,12 +58,13 @@ services:
   #   depends_on:
   #     - comms_gateway
 
-  # Example: Your autopilot / guidance node
+  # Example: Service with its own IP on the agent subnet
   # autopilot:
   #   build: ./your_autopilot
-  #   network_mode: "service:comms_gateway"
+  #   networks:
+  #     sim_net:
+  #       ipv4_address: 10.0.${AGENT_ID}.20
   #   environment:
-  #     - ROS_AUTOMATIC_DISCOVERY_RANGE=LOCALHOST
   #     - ROS_DOMAIN_ID=${ROS_DOMAIN_ID}
   #     - AGENT_NAME=${AGENT_NAME}
   #   depends_on:

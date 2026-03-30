@@ -1,8 +1,22 @@
-version: "3.8"
+# CRUCIBLE — Multi-Agent Simulation Framework
+#
+# Network layout (sim_net 10.0.0.0/16):
+#   10.0.0.10-99  — Crucible infrastructure (sim_engine, orchestrator, frontend)
+#   10.0.{AGENT_ID}.X — Agent stacks (each agent gets a /24 for its services)
+#
+# Agent stacks join sim_net as an external network:
+#   networks:
+#     sim_net:
+#       external: true
+#       name: crucible_sim_net
 
 networks:
-  swarm_net:
-    external: true
+  sim_net:
+    name: crucible_sim_net
+    driver: bridge
+    ipam:
+      config:
+        - subnet: ${SIM_SUBNET:-10.0.0.0/16}
 
 services:
   sim_engine:
@@ -10,8 +24,8 @@ services:
       context: .
       dockerfile: src/crucible_engine/docker/Dockerfile.sim_engine
     networks:
-      swarm_net:
-        ipv4_address: ${SIM_ENGINE_IP:-172.20.0.100}
+      sim_net:
+        ipv4_address: ${SIM_ENGINE_IP:-10.0.0.10}
     environment:
       - ROS_AUTOMATIC_DISCOVERY_RANGE=LOCALHOST
       - ROS_DOMAIN_ID=0
@@ -49,8 +63,8 @@ services:
       context: ./src/crucible_orch
       dockerfile: docker/Dockerfile
     networks:
-      swarm_net:
-        ipv4_address: ${ORCHESTRATOR_IP:-172.20.0.101}
+      sim_net:
+        ipv4_address: ${ORCHESTRATOR_IP:-10.0.0.11}
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - ./stacks:/opt/stacks:ro
@@ -60,7 +74,7 @@ services:
       context: .
       dockerfile: src/crucible_engine/docker/Dockerfile.frontend
     networks:
-      - swarm_net
+      - sim_net
     ports:
       - "${FRONTEND_PORT:-8080}:80"
     depends_on:
