@@ -10,9 +10,11 @@
 #   FLEET_IDS    — comma-separated list of all agent IDs (e.g., 1,2,3)
 #   FLEET_SIZE   — total number of agents in the scenario
 #   ROS_DOMAIN_ID — DDS domain for this agent
+#   RUN_ID       — auto-incrementing run counter (resets on page load)
 #   SIM_NET      — Docker network name (default: crucible_sim_net)
 #   STACK_DIR    — absolute host path to the compose file's directory
 #                  (use for volume mounts, e.g., ${STACK_DIR}/config:/opt/config)
+#   TEST_NAME    — user-defined test/scenario name (editable in UI)
 #
 # Network layout:
 #   Crucible creates 'crucible_sim_net' (default 10.0.0.0/16).
