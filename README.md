@@ -41,6 +41,8 @@ CRUCIBLE is organized as a colcon workspace with submodules under `src/`:
 ```
 crucible/
 ├── docker-compose.yml
+├── docker/
+│   └── Dockerfile.test             # Test runner image
 ├── config/
 │   ├── scenario.yaml               # Example scenario (3 UAVs)
 │   └── zenoh_bridge.json5          # Zenoh bridge config
@@ -84,6 +86,7 @@ crucible/
 │   │   │   │       ├── static.py
 │   │   │   │       ├── waypoint.py
 │   │   │   │       └── commanded.py
+│   │   │   ├── test/               # Unit tests (pytest)
 │   │   │   ├── package.xml
 │   │   │   └── setup.py
 │   │   ├── ws_bridge/              # ROS2 Python package
@@ -115,6 +118,7 @@ crucible/
 │       ├── orchestrator/
 │       │   ├── compose_manager.py
 │       │   └── server.py
+│       ├── tests/                  # Unit tests (pytest)
 │       ├── docker/
 │       │   └── Dockerfile
 │       ├── requirements.txt
@@ -247,6 +251,39 @@ docker compose up --build
 ```
 
 All Dockerfiles live in `docker/` subdirectories within their respective submodules and use the integration repo root as their build context, referencing source paths under `src/`.
+
+## Testing
+
+CRUCIBLE has unit tests for the simulation engine and the stack orchestrator. The easiest way to run the full suite is via Docker:
+
+```bash
+# Build and run all tests in a container (no local dependencies needed)
+docker build -f docker/Dockerfile.test -t crucible-test .
+docker run --rm crucible-test
+```
+
+### Running tests locally
+
+**Orchestrator tests** (pure Python, no ROS2 required):
+```bash
+pip install pytest pytest-asyncio websockets
+cd src/crucible_orch
+python3 -m pytest tests/ -v
+```
+
+**Sim engine tests** (requires ROS2 Jazzy + crucible_msgs built):
+```bash
+# In a sourced ROS2 workspace with crucible_msgs built
+cd src/crucible_engine/sim_engine
+python3 -m pytest test/ -v
+```
+
+### Test coverage
+
+| Package | Tests | Covers |
+|---|---|---|
+| sim_engine | 103 | Agent/Pose, WorldState, all sensors (NavSatFix, IMU, Altimeter, TWR Radio), all motion models (Static, Waypoint, CommandedVelocity), config loading, scenario runner, terrain |
+| crucible_orch | 33 | ComposeManager lifecycle, StackInfo, WebSocket server command handling, broadcast, health checks |
 
 ## License
 

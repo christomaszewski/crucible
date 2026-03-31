@@ -1,0 +1,59 @@
+FROM ros:jazzy
+
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+        python3-pip \
+        python3-yaml && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
+
+RUN pip3 install --break-system-packages --ignore-installed \
+    pytest \
+    pytest-asyncio \
+    websockets
+
+WORKDIR /ros2_ws
+
+# Copy source packages
+COPY src/crucible_msgs/ src/crucible_msgs/
+COPY src/crucible_engine/sim_engine/ src/sim_engine/
+COPY src/crucible_orch/ src/crucible_orch/
+
+# Build crucible_msgs (needed for sensor imports)
+RUN . /opt/ros/jazzy/setup.sh && \
+    colcon build --packages-select crucible_msgs
+
+COPY <<'SCRIPT' /ros2_ws/run_tests.sh
+#!/bin/bash
+set -e
+source /opt/ros/jazzy/setup.bash
+source /ros2_ws/install/setup.bash
+
+echo "========================================"
+echo " sim_engine tests"
+echo "========================================"
+cd /ros2_ws/src/sim_engine
+python3 -m pytest test/ -v
+SIM_EXIT=$?
+
+echo ""
+echo "========================================"
+echo " crucible_orch tests"
+echo "========================================"
+cd /ros2_ws/src/crucible_orch
+python3 -m pytest tests/ -v
+ORCH_EXIT=$?
+
+echo ""
+echo "========================================"
+if [ $SIM_EXIT -eq 0 ] && [ $ORCH_EXIT -eq 0 ]; then
+    echo " ALL TESTS PASSED"
+else
+    echo " SOME TESTS FAILED"
+fi
+echo "========================================"
+
+exit $(( SIM_EXIT || ORCH_EXIT ))
+SCRIPT
+RUN chmod +x /ros2_ws/run_tests.sh
+
+CMD ["/ros2_ws/run_tests.sh"]
