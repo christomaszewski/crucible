@@ -67,8 +67,9 @@ services:
         ipv4_address: ${ORCHESTRATOR_IP:-10.0.0.11}
     environment:
       - STACKS_HOST_PATH=${PWD}/stacks
+      - CONTAINER_RUNTIME=${CONTAINER_RUNTIME:-docker}
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
+      - ${CONTAINER_SOCKET:-/var/run/docker.sock}:/var/run/docker.sock
       - ./stacks:/opt/stacks:ro
 
   frontend:
