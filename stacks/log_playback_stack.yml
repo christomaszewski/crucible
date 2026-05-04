@@ -1,0 +1,72 @@
+# CRUCIBLE — Log Playback Agent Stack
+#
+# Plays back a ROS2 bag and republishes its sensor topics into the agent's
+# namespace so the sim engine's `log_playback` motion model can drive the
+# agent's pose from the recorded data.
+#
+# Standard env vars supplied by the orchestrator:
+#   AGENT_ID, AGENT_NAME, AGENT_NS, ROS_DOMAIN_ID, SIM_NET, STACK_DIR, ...
+#
+# Stack-specific env vars (set under agent.stack.env in scenario.yaml):
+#   BAG_PATH       — path inside the container to the bag dir/file
+#                    (default: /bags/${AGENT_NAME}_session)
+#   PLAYBACK_RATE  — playback speed multiplier (default: 1.0)
+#
+# Mount your bags directory by adjusting the `bags` volume below.
+
+networks:
+  sim_net:
+    external: true
+    name: ${SIM_NET:-crucible_sim_net}
+
+services:
+  # Gateway — anchors the agent on the sim network so the bag player and
+  # zenoh bridge can share the network namespace.
+  comms_gateway:
+    image: ros:jazzy
+    networks:
+      sim_net:
+        ipv4_address: 10.0.${AGENT_ID}.10
+    environment:
+      - ROS_AUTOMATIC_DISCOVERY_RANGE=LOCALHOST
+      - ROS_DOMAIN_ID=${ROS_DOMAIN_ID}
+      - RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
+    command: ["sleep", "infinity"]
+
+  # Zenoh bridge — forwards the agent's topics to the sim engine's domain (0).
+  zenoh_bridge:
+    image: eclipse/zenoh-bridge-ros2dds:latest
+    network_mode: "service:comms_gateway"
+    depends_on:
+      - comms_gateway
+
+  # Bag player — replays recorded sensor data into the agent's namespace.
+  #
+  # The --remap arguments below assume your bag was recorded with relative
+  # topics (e.g. /gps/fix, /imu/data). Adjust them so the published topics
+  # match what the log_playback motion model subscribes to:
+  #   /${AGENT_NAME}/gps/fix     (NavSatFix, position)
+  #   /${AGENT_NAME}/imu/data    (Imu, orientation — optional)
+  #
+  # If your bag already has agent-namespaced topics, remove the --remap flags.
+  # The --clock flag publishes /clock from bag timestamps; omit it if the
+  # sim engine should drive sim time instead.
+  bag_player:
+    image: ros:jazzy
+    network_mode: "service:comms_gateway"
+    environment:
+      - ROS_AUTOMATIC_DISCOVERY_RANGE=LOCALHOST
+      - ROS_DOMAIN_ID=${ROS_DOMAIN_ID}
+      - RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
+      - AGENT_NAME=${AGENT_NAME}
+      - BAG_PATH=${BAG_PATH:-/bags/${AGENT_NAME}_session}
+      - PLAYBACK_RATE=${PLAYBACK_RATE:-1.0}
+    volumes:
+      - ${STACK_DIR}/bags:/bags:ro
+    depends_on:
+      - comms_gateway
+    command: >
+      bash -c "ros2 bag play ${BAG_PATH}
+        --rate ${PLAYBACK_RATE}
+        --remap /gps/fix:=/${AGENT_NAME}/gps/fix
+                /imu/data:=/${AGENT_NAME}/imu/data"

@@ -222,6 +222,34 @@ agents:
         ROS_DOMAIN_ID: "4"
         AGENT_NAMESPACE: usv_04
 
+  # --- UAV (replay): pose driven by a played-back ROS2 bag ---
+  # The agent stack runs ros2 bag play, which republishes the recorded
+  # NavSatFix on /log_uav_06/gps/fix (and optionally Imu on /log_uav_06/imu/data).
+  # The sim engine subscribes to those topics and reflects them as agent pose,
+  # so the marker on the map reacts to the played-back data.
+  log_uav_06:
+    domain_id: 6
+    vehicle_type: uav
+    vehicle_class: quadrotor
+    initial_pose:
+      lat: 38.90720
+      lon: -77.03690
+      alt: 100.0
+      heading: 0.0
+    motion:
+      type: log_playback
+      position_topic: gps/fix         # → /log_uav_06/gps/fix (NavSatFix)
+      orientation_topic: imu/data     # → /log_uav_06/imu/data (Imu, optional)
+    # No `sensors:` block — the bag publishes them.
+    stack:
+      compose_file: "/opt/stacks/log_playback_stack.yml"
+      auto_launch: false
+      env:
+        AGENT_NAME: log_uav_06
+        ROS_DOMAIN_ID: "6"
+        AGENT_NAMESPACE: log_uav_06
+        BAG_PATH: /bags/example_session
+
   # --- UUV: waypoint dive with altimeter + ranging ---
   uuv_05:
     domain_id: 5
