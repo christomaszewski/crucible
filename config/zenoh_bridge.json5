@@ -28,6 +28,16 @@
 
       // Allow all agent-namespaced topics through
       // Each agent's topics follow the pattern: /<agent_name>/<sensor_suffix>
+      //
+      // publishers:  topics for which sim_engine has a local DDS publisher
+      //              that the bridge announces on zenoh (sim → agents).
+      // subscribers: topics for which sim_engine has a local DDS subscriber
+      //              the bridge fulfills from zenoh (agents → sim).
+      //
+      // gps/fix and imu/data appear in BOTH lists: sim publishes synthesized
+      // sensor data for normal agents, and subscribes to those same topics
+      // when an agent uses the log_playback motion model and a bag in the
+      // agent stack drives its pose.
       allow: {
         publishers: [
           "*/gps/fix",
@@ -39,7 +49,9 @@
         ],
         subscribers: [
           "*/cmd_vel",
-          "*/pose/estimate"
+          "*/pose/estimate",
+          "*/gps/fix",
+          "*/imu/data"
         ],
         services: [
           "/sim/**"
