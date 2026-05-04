@@ -46,12 +46,19 @@ services:
   # network_mode shares the network namespace only; ROS_DOMAIN_ID still needs
   # to be set explicitly so the bridge picks up DDS traffic on the agent's
   # domain rather than defaulting to domain 0.
+  #
+  # Multicast scouting between zenoh peers is unreliable on Docker bridge
+  # networks, so peer to the central bridge over TCP via an explicit
+  # connect endpoint. The central bridge listens on the sim_engine's IP
+  # (default 10.0.0.10) at port 7447 — override with ZENOH_ROUTER if you
+  # changed SIM_ENGINE_IP.
   zenoh_bridge:
     image: eclipse/zenoh-bridge-ros2dds:latest
     network_mode: "service:comms_gateway"
     environment:
       - ROS_DOMAIN_ID=${ROS_DOMAIN_ID}
       - RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
+    command: ["-e", "tcp/${ZENOH_ROUTER:-10.0.0.10:7447}"]
     # volumes:
     #   - ./zenoh_agent.json5:/etc/zenoh/config.json5:ro
     depends_on:
