@@ -42,10 +42,16 @@ services:
       - RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
     command: ["sleep", "infinity"]  # Replace with your gateway node
 
-  # Zenoh bridge — routes inter-agent traffic
+  # Zenoh bridge — routes inter-agent traffic.
+  # network_mode shares the network namespace only; ROS_DOMAIN_ID still needs
+  # to be set explicitly so the bridge picks up DDS traffic on the agent's
+  # domain rather than defaulting to domain 0.
   zenoh_bridge:
     image: eclipse/zenoh-bridge-ros2dds:latest
     network_mode: "service:comms_gateway"
+    environment:
+      - ROS_DOMAIN_ID=${ROS_DOMAIN_ID}
+      - RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
     # volumes:
     #   - ./zenoh_agent.json5:/etc/zenoh/config.json5:ro
     depends_on:

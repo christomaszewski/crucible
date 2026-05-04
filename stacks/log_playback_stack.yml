@@ -34,9 +34,15 @@ services:
     command: ["sleep", "infinity"]
 
   # Zenoh bridge — forwards the agent's topics to the sim engine's domain (0).
+  # network_mode shares the network namespace only; ROS_DOMAIN_ID still needs
+  # to be set explicitly so the bridge picks up DDS traffic on the agent's
+  # domain rather than defaulting to domain 0.
   zenoh_bridge:
     image: eclipse/zenoh-bridge-ros2dds:latest
     network_mode: "service:comms_gateway"
+    environment:
+      - ROS_DOMAIN_ID=${ROS_DOMAIN_ID}
+      - RMW_IMPLEMENTATION=rmw_cyclonedds_cpp
     depends_on:
       - comms_gateway
 
