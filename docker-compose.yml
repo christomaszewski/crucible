@@ -42,6 +42,11 @@ services:
     network_mode: "service:sim_engine"
     volumes:
       - ./config/zenoh_bridge.json5:/etc/zenoh/config.json5:ro
+    # The image does NOT auto-load configs from /etc/zenoh — it must be
+    # passed explicitly. Without -c, the bridge runs with all defaults
+    # (no listen on 7447, no allow-list), which leaves agent stacks
+    # unable to peer with it.
+    command: ["-c", "/etc/zenoh/config.json5"]
     depends_on:
       - sim_engine
 
